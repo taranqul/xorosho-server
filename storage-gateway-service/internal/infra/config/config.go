@@ -13,6 +13,7 @@ type Config struct {
 	MinioSecretAccessKey  string `env:"MINIO_SECRET_KEY,required"`
 	MinIoUseSSL           bool   `env:"MINIO_USE_SSL" envDefault:"true"`
 	LogLevel              string `env:"LOG_LEVEL" envDefault:"INFO"`
+	Port                  int    `env:"PORT"`
 }
 
 func LoadConfig() (*Config, error) {

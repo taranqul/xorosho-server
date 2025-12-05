@@ -1,18 +1,24 @@
 package deps
 
 import (
-	"task-manager-service/internal/domain"
+	"context"
+	"task-manager-service/internal/domain/service"
 	"task-manager-service/internal/infra/config"
+	"task-manager-service/internal/infra/repositories"
 
 	"go.uber.org/zap"
 )
 
 type Container struct {
-	service *domain.TaskService
+	service *service.TaskService
 }
 
 func NewContainer(cfg *config.Config, logger *zap.Logger) *Container {
-	service, err := domain.NewTaskService()
+	repository, err := repositories.NewMongoTaskRepository(cfg, context.Background(), logger)
+	if err != nil {
+		logger.Sugar().Fatalf("Can't build container %v", err)
+	}
+	service, err := service.NewTaskService(repository)
 	if err != nil {
 		logger.Sugar().Fatalf("Can't build container %v", err)
 	}
@@ -23,6 +29,6 @@ func NewContainer(cfg *config.Config, logger *zap.Logger) *Container {
 
 }
 
-func (c *Container) GetTaskService() *domain.TaskService {
+func (c *Container) GetTaskService() *service.TaskService {
 	return c.service
 }

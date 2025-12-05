@@ -1,10 +1,10 @@
 services:
-  api-gateway:
+  api-gateway-service:
     build:
       context: ./api-gateway-service
       dockerfile: Dockerfile
-    image: api-gateway
-    container_name: api-gateway
+    image: api-gateway-service
+    container_name: api-gateway-service
     ports:
       - "8080:8080"
 
@@ -12,9 +12,24 @@ services:
     build:
       context: ./storage-gateway-service
       dockerfile: Dockerfile
+    image: storage-gateway-service
     container_name: storage-gateway-service
     expose:
       - "8080"
+    env_file:
+      - .env
+    depends_on:
+      minio:
+        condition: service_healthy
+
+  task-manager-service:
+    build:
+      context: ./task-manager-service
+      dockerfile: Dockerfile
+    image: task-manager-service
+    container_name: task-manager-service
+    ports:
+      - "8081:8080"
     env_file:
       - .env
     depends_on:
@@ -49,5 +64,17 @@ services:
     volumes:
       - ./minio-init/init-minio.sh:/init-minio.sh:ro
 
+  mongo:
+    image: mongo:7
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo-data:/data/db
+
 volumes:
+  mongo-data:
   minio-storage:

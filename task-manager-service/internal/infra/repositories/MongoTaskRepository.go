@@ -7,6 +7,7 @@ import (
 	"task-manager-service/internal/infra/config"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
@@ -48,4 +49,22 @@ func (r *MongoTaskRepository) CreateTask(task domain.TaskInRepository) (uuid.UUI
 	}
 
 	return uuid.Parse(fmt.Sprint(res.InsertedID))
+}
+
+func (r *MongoTaskRepository) GetTaskStatus(id string) (string, error) {
+	var result domain.TaskInRepository
+
+	filter := bson.M{"_id": id}
+	err := r.collection.FindOne(r.ctx, filter).Decode(&result)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return "", err
+		} else {
+			return "", err
+		}
+	}
+
+	return result.Status, nil
+
 }

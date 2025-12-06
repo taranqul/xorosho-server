@@ -27,3 +27,7 @@ func (s *TaskService) CreateTask(task domain.Task) (uuid.UUID, error) {
 	}
 	return s.task_repository.CreateTask(to_create)
 }
+
+func (s *TaskService) GetTaskStatus(id string) (string, error) {
+	return s.task_repository.GetTaskStatus(id)
+}

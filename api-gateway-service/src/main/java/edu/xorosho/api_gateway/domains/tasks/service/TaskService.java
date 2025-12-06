@@ -30,4 +30,8 @@ public class TaskService {
         
         return new TaskResponse(uuid.toString(), urls);
     }
+
+    public String getTaskStatus(String id) {
+        return task_manager.getTaskStatus(id);
+    }
 }

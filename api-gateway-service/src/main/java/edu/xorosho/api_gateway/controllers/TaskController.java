@@ -41,9 +41,16 @@ public class TaskController {
         return new TaskSchemaResponse(taskSchemeValidator.getTaskSchema(task).getSchema());
     }
     
+    @GetMapping("/{task}/status")
+    public String getTaskStatus(@PathVariable String task) {
+        return taskService.getTaskStatus(task);
+    }
+
     @GetMapping()
     public List<String> getTasks() {
         return taskSchemeValidator.getTasks();
     }
+
+    
     
 }

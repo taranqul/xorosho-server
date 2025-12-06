@@ -1,9 +1,11 @@
 package edu.xorosho.api_gateway.domains.tasks.service;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -41,5 +43,31 @@ public class TaskManager {
         String value = valueNode.asText();
 
         return UUID.fromString(value);
+    }
+
+    @SneakyThrows
+    public String getTaskStatus(String id) {
+        String query = "id=" + URLEncoder.encode(id.toString(), StandardCharsets.UTF_8);
+
+        URI uri = new URI("http://task-manager-service:8080/task/status" + "?" + query);
+
+        HttpClient client = HttpClient.newHttpClient();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .GET()
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String responseBody = response.body();
+        JsonNode root = mapper.readTree(responseBody);
+        JsonNode valueNode = root.get("status");
+
+        if (valueNode == null) {
+            throw new RuntimeException("cant read json, empty uuid");
+        }
+
+        String value = valueNode.asText();
+
+        return value;
     }
 }

@@ -40,6 +40,16 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 	c.JSON(200, gin.H{"uuid": uuid})
 }
 
+func (h *TaskHandler) GetTaskStatus(c *gin.Context) {
+	id := c.Query("id")
+	status, err := h.service.GetTaskStatus(id)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+	}
+	c.JSON(200, gin.H{"status": status})
+}
+
 func (h *TaskHandler) registerEndpoints(rg *gin.RouterGroup) {
 	rg.POST("", h.CreateTask)
+	rg.GET("/status", h.GetTaskStatus)
 }

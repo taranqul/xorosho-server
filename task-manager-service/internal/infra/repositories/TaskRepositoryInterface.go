@@ -8,4 +8,5 @@ import (
 
 type TaskRepositoryInterface interface {
 	CreateTask(domain.TaskInRepository) (uuid.UUID, error)
+	GetTaskStatus(string) (string, error)
 }

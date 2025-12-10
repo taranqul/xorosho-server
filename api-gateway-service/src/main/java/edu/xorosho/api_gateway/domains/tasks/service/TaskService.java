@@ -15,11 +15,24 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class TaskService {
+
     private final UrlRepository url_repo;
     private final TaskManager task_manager;
+    private final TaskSchemeValidator taskSchemeValidator;
+
     public TaskResponse createTask(TaskRequest request){
-        TaskManagerRequest task_request = new TaskManagerRequest(UUID.randomUUID(), request.getTask_type(), request.getObjects(), request.getPayload());
+
+        taskSchemeValidator.validateScheme(request);
+
+        TaskManagerRequest task_request = new TaskManagerRequest(
+                UUID.randomUUID(),
+                request.getTask_type(),
+                request.getObjects(),
+                request.getPayload()
+        );
+
         UUID uuid = task_manager.createTask(task_request);
+
         Map<String, String> urls = new HashMap<>();
         for (Map.Entry<String, String> entry : request.getObjects().entrySet()) {
             String object = entry.getKey();
@@ -27,7 +40,7 @@ public class TaskService {
             String name = uuid + "_" + object + type;
             urls.put(object, url_repo.getUrl(name));
         }
-        
+
         return new TaskResponse(uuid.toString(), urls);
     }
 

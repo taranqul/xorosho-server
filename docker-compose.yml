@@ -125,24 +125,9 @@ services:
         condition: service_healthy
     environment:
       KAFKA_BROKER: "kafka:9092"
-    command: >
-      bash -c '
-        for i in {1..30}; do
-          if kafka-topics \
-          --bootstrap-server $${KAFKA_BROKER} \
-          --create \
-          --topic uploaded_files \
-          --partitions 1 \
-          --replication-factor 1 \
-          --if-not-exists; then
-          echo "Topic created or already exists!"
-          exit 0
-        fi
-          echo "Waiting for Kafka... (attempt $$i/30)";
-          sleep 5;
-        done;
-        echo "Failed to create topic after 30 attempts";
-        exit 1;'
+    volumes:
+      - ./kafka-init/kafka-init.sh:/kafka-init.sh
+    command: ["/bin/bash", "/kafka-init.sh"]
 volumes:
   mongo-data:
   minio-storage:

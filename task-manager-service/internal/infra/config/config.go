@@ -7,12 +7,13 @@ import (
 )
 
 type Config struct {
-	LogLevel string   `env:"LOG_LEVEL" envDefault:"INFO"`
-	MongoURI string   `env:"MONGO_URI"`
-	MongoDB  string   `env:"MONGO_DB"`
-	Port     int      `env:"PORT"`
-	GroupID  string   `env:"GROUP_ID"`
-	Brokers  []string `env:"BROKERS" envSeparator:","`
+	LogLevel     string   `env:"LOG_LEVEL" envDefault:"INFO"`
+	MongoURI     string   `env:"MONGO_URI"`
+	MongoDB      string   `env:"MONGO_DB"`
+	Port         int      `env:"PORT"`
+	GroupID      string   `env:"GROUP_ID"`
+	Brokers      []string `env:"BROKERS" envSeparator:","`
+	KafkaAddress string   `env:"KAFKA_ADDRESS"`
 }
 
 func LoadConfig() (*Config, error) {

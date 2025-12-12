@@ -2,6 +2,7 @@ package services
 
 import (
 	"task-manager-service/internal/domain"
+	"task-manager-service/internal/infra/kafka/producers"
 	"task-manager-service/internal/infra/repositories"
 
 	"github.com/google/uuid"
@@ -10,11 +11,13 @@ import (
 
 type TaskService struct {
 	task_repository repositories.TaskRepositoryInterface
+	task_producer   *producers.TasksProducer
 	logger          *zap.Logger
 }
 
-func NewTaskService(task_repository repositories.TaskRepositoryInterface, logger *zap.Logger) (*TaskService, error) {
+func NewTaskService(task_producer *producers.TasksProducer, task_repository repositories.TaskRepositoryInterface, logger *zap.Logger) (*TaskService, error) {
 	return &TaskService{
+		task_producer:   task_producer,
 		task_repository: task_repository,
 		logger:          logger,
 	}, nil
@@ -34,7 +37,7 @@ func (s *TaskService) CreateTask(task domain.Task) (*uuid.UUID, error) {
 	}
 
 	to_create := domain.TaskInRepository{
-		Id:      task.Id.String(),
+		Id:      task.Id,
 		Type:    task.Type,
 		Objects: task.Objects,
 		Payload: task.Payload,
@@ -90,7 +93,17 @@ func (s *TaskService) HandleUploadedFile(uploaded_file domain.UploadedFilesMessa
 	}
 }
 
-func (s *TaskService) initTask(task *domain.TaskInRepository) error {
+func (s *TaskService) initTask(task *domain.TaskInRepository) {
 	s.logger.Sugar().Infof("not implemented yet: %v", task.Id)
-	return nil
+	err := s.task_producer.Write(domain.Task{
+		Id:      task.Id,
+		Type:    task.Type,
+		Objects: task.Objects,
+		Payload: task.Payload,
+	})
+
+	if err != nil {
+		s.logger.Sugar().Errorf("task with %v wasnt initiated", task.Id)
+		return
+	}
 }

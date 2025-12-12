@@ -4,6 +4,7 @@ import (
 	"context"
 	"task-manager-service/internal/domain/services"
 	"task-manager-service/internal/infra/config"
+	"task-manager-service/internal/infra/kafka/producers"
 	"task-manager-service/internal/infra/repositories"
 
 	"go.uber.org/zap"
@@ -15,11 +16,11 @@ type Container struct {
 
 func NewContainer(cfg *config.Config, logger *zap.Logger) *Container {
 	repository, err := repositories.NewMongoTaskRepository(cfg, context.Background(), logger)
-
+	task_producer := producers.NewTasksProducer(cfg.KafkaAddress, logger)
 	if err != nil {
 		logger.Sugar().Fatalf("Can't build container %v", err)
 	}
-	service, err := services.NewTaskService(repository, logger)
+	service, err := services.NewTaskService(task_producer, repository, logger)
 
 	if err != nil {
 		logger.Sugar().Fatalf("Can't build container %v", err)

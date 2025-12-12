@@ -37,7 +37,21 @@ services:
         condition: service_healthy
       kafka-init:
         condition: service_completed_successfully
-
+  task-dispatcher-service:
+    build:
+      context: ./task-dispatcher-service
+      dockerfile: Dockerfile
+    image: task-dispatcher-service
+    container_name: task-dispatcher-service
+    expose:
+      - "8080"
+    env_file:
+      - ./task-dispatcher-service/.env.example
+    depends_on:
+      minio:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
   storage-notifications-service:
     build:
       context: ./storage-notifications-service
@@ -125,24 +139,9 @@ services:
         condition: service_healthy
     environment:
       KAFKA_BROKER: "kafka:9092"
-    command: >
-      bash -c '
-        for i in {1..30}; do
-          if kafka-topics \
-          --bootstrap-server $${KAFKA_BROKER} \
-          --create \
-          --topic uploaded_files \
-          --partitions 1 \
-          --replication-factor 1 \
-          --if-not-exists; then
-          echo "Topic created or already exists!"
-          exit 0
-        fi
-          echo "Waiting for Kafka... (attempt $$i/30)";
-          sleep 5;
-        done;
-        echo "Failed to create topic after 30 attempts";
-        exit 1;'
+    volumes:
+      - ./kafka-init/init-kafka.sh:/kafka-init.sh:ro
+    command: ["/bin/bash", "/kafka-init.sh"]
 volumes:
   mongo-data:
   minio-storage:

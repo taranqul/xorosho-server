@@ -18,3 +18,9 @@ type TaskInRepository struct {
 	Objects map[string]string `bson:"objects"`
 	Payload map[string]any    `bson:"payload"`
 }
+
+type UploadedFilesMessage struct {
+	File   string `json:"file"`
+	TaskID string `json:"task_id"`
+	Type   string `json:"type"`
+}

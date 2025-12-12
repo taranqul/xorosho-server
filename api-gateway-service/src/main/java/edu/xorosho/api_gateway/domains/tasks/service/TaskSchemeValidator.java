@@ -21,29 +21,31 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class TaskSchemeValidator {
+
     private final TaskSchemaRepository task_scheme_repository;
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonSchemaFactory FACTORY = JsonSchemaFactory.getInstance(VersionFlag.V202012);
+
     public void validateScheme(TaskRequest request) {
-     
-        TaskSchema schema = this.task_scheme_repository.getSchema(request.getTask_type()); 
-        
+
+        TaskSchema schema = this.task_scheme_repository.getSchema(request.getTaskType());
 
         JsonSchema jsonSchema = FACTORY.getSchema(schema.getSchema());
         ObjectNode data = mapper.createObjectNode();
         data.set("objects", mapper.valueToTree(request.getObjects()));
         data.set("payload", request.getPayload());
+
         Set<ValidationMessage> errors = jsonSchema.validate(data);
         if (!errors.isEmpty()) {
             throw new TaskSchemaNotValid();
         }
     }
-    
+
     public TaskSchema getTaskSchema(String name) {
-        return this.task_scheme_repository.getSchema(name); 
+        return this.task_scheme_repository.getSchema(name);
     }
 
-    public List<String> getTasks(){
+    public List<String> getTasks() {
         return this.task_scheme_repository.getTasks();
     }
 }

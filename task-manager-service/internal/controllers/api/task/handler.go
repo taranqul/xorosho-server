@@ -2,7 +2,7 @@ package task
 
 import (
 	"task-manager-service/internal/domain"
-	"task-manager-service/internal/domain/service"
+	"task-manager-service/internal/domain/services"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -10,10 +10,10 @@ import (
 
 type TaskHandler struct {
 	logger  *zap.Logger
-	service *service.TaskService
+	service *services.TaskService
 }
 
-func NewTaskHandler(service *service.TaskService, logger *zap.Logger, rg *gin.RouterGroup) *TaskHandler {
+func NewTaskHandler(service *services.TaskService, logger *zap.Logger, rg *gin.RouterGroup) *TaskHandler {
 	handler := &TaskHandler{
 		logger:  logger,
 		service: service,

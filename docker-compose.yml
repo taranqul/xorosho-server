@@ -17,7 +17,7 @@ services:
     expose:
       - "8080"
     env_file:
-      - .env
+      - ./storage-gateway-service/.env.example
     depends_on:
       minio:
         condition: service_healthy
@@ -28,10 +28,26 @@ services:
       dockerfile: Dockerfile
     image: task-manager-service
     container_name: task-manager-service
-    ports:
-      - "8081:8080"
+    expose:
+      - "8080"
     env_file:
-      - ./task-manager-service/.env
+      - ./task-manager-service/.env.example
+    depends_on:
+      minio:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+
+  storage-notifications-service:
+    build:
+      context: ./storage-notifications-service
+      dockerfile: Dockerfile
+    image: storage-notifications-service
+    container_name: storage-notifications-service
+    expose:
+      - "8080"
+    env_file:
+      - ./storage-notifications-service/.env.example
     depends_on:
       minio:
         condition: service_healthy
@@ -46,7 +62,7 @@ services:
       MINIO_ROOT_USER: tarantul
       MINIO_ROOT_PASSWORD: tarantul123
       MINIO_NOTIFY_WEBHOOK_ENABLE_PRIMARY: on
-      MINIO_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY: http://storage-notifications-service:8081/webhook/
+      MINIO_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY: http://storage-notifications-service:8080/webhook/
     volumes:
       - minio-storage:/data
     healthcheck:
@@ -74,7 +90,60 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
       - mongo-data:/data/db
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
 
+      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data" 
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  kafka-init:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER: "kafka:9092"
+    command: >
+      bash -c '
+        for i in {1..30}; do
+          if kafka-topics \
+          --bootstrap-server $${KAFKA_BROKER} \
+          --create \
+          --topic uploaded_files \
+          --partitions 1 \
+          --replication-factor 1 \
+          --if-not-exists; then
+          echo "Topic created or already exists!"
+          exit 0
+        fi
+          echo "Waiting for Kafka... (attempt $$i/30)";
+          sleep 5;
+        done;
+        echo "Failed to create topic after 30 attempts";
+        exit 1;'
 volumes:
   mongo-data:
   minio-storage:
+  kafka-data:

@@ -1,8 +1,8 @@
 package api
 
 import (
-	"task-manager-service/internal/api/debug"
-	"task-manager-service/internal/api/task"
+	"task-manager-service/internal/controllers/api/debug"
+	"task-manager-service/internal/controllers/api/task"
 	"task-manager-service/internal/deps"
 
 	"github.com/gin-gonic/gin"

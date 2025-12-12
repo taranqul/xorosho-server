@@ -41,17 +41,22 @@ func NewMongoTaskRepository(cfg *config.Config, ctx context.Context, logger *zap
 	}, nil
 }
 
-func (r *MongoTaskRepository) CreateTask(task domain.TaskInRepository) (uuid.UUID, error) {
-	res, err := r.collection.InsertOne(r.ctx, task)
+func (r *MongoTaskRepository) Create(task *domain.TaskInRepository) (uuid.UUID, error) {
 
+	res, err := r.collection.InsertOne(r.ctx, task)
 	if err != nil {
-		panic(err)
+		return uuid.Nil, fmt.Errorf("failed to insert task: %w", err)
 	}
 
-	return uuid.Parse(fmt.Sprint(res.InsertedID))
+	id, err := uuid.Parse(fmt.Sprint(res.InsertedID))
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid UUID: %w", err)
+	}
+
+	return id, nil
 }
 
-func (r *MongoTaskRepository) GetTaskStatus(id string) (string, error) {
+func (r *MongoTaskRepository) GetStatus(id string) (*string, error) {
 	var result domain.TaskInRepository
 
 	filter := bson.M{"_id": id}
@@ -59,12 +64,53 @@ func (r *MongoTaskRepository) GetTaskStatus(id string) (string, error) {
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return "", err
+			return nil, err
 		} else {
-			return "", err
+			return nil, err
 		}
 	}
 
-	return result.Status, nil
+	return &result.Status, nil
 
+}
+
+func (r *MongoTaskRepository) Get(id string) (*domain.TaskInRepository, error) {
+	var result domain.TaskInRepository
+
+	filter := bson.M{"_id": id}
+	err := r.collection.FindOne(r.ctx, filter).Decode(&result)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, err
+		} else {
+			return nil, err
+		}
+	}
+
+	return &result, nil
+
+}
+
+func (r *MongoTaskRepository) Put(task domain.TaskInRepository) error {
+	filter := bson.M{"_id": task.Id}
+	update := bson.M{
+		"$set": bson.M{
+			"status":  task.Status,
+			"type":    task.Type,
+			"objects": task.Objects,
+			"payload": task.Payload,
+		},
+	}
+
+	res, err := r.collection.UpdateOne(r.ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to update task: %w", err)
+	}
+
+	if res.MatchedCount == 0 {
+		return fmt.Errorf("task with id %s not found", task.Id)
+	}
+
+	return nil
 }

@@ -7,6 +7,8 @@ import (
 )
 
 type TaskRepositoryInterface interface {
-	CreateTask(domain.TaskInRepository) (uuid.UUID, error)
-	GetTaskStatus(string) (string, error)
+	Create(*domain.TaskInRepository) (uuid.UUID, error)
+	GetStatus(string) (*string, error)
+	Get(string) (*domain.TaskInRepository, error)
+	Put(domain.TaskInRepository) error
 }

@@ -22,7 +22,8 @@ func NewOrchestrator(cfg *config.Config, logger *zap.Logger, deps *deps.Containe
 	ctx := context.Background()
 	var cons []Consumer
 	upload_consumer := consumers.NewUploadFilesConsumer(cfg.Brokers, cfg.GroupID, deps.GetTaskService(), logger)
-	cons = append(cons, upload_consumer)
+	result_consumer := consumers.NewTaskResultConsumer(cfg.Brokers, cfg.GroupID, deps.GetTaskService(), logger)
+	cons = append(cons, upload_consumer, result_consumer)
 	return &KafkaOrchestrator{
 		ctx:       ctx,
 		consumers: cons,

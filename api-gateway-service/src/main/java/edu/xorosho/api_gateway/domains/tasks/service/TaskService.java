@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import edu.xorosho.api_gateway.domains.tasks.dto.Task;
 import edu.xorosho.api_gateway.domains.tasks.dto.TaskRequest;
 import edu.xorosho.api_gateway.domains.tasks.dto.TaskResponse;
 import edu.xorosho.api_gateway.domains.tasks.models.TaskManagerRequest;
@@ -33,5 +34,9 @@ public class TaskService {
 
     public String getTaskStatus(String id) {
         return task_manager.getTaskStatus(id);
+    }
+
+    public Task getTask(String id) {
+        return task_manager.getTask(id);
     }
 }

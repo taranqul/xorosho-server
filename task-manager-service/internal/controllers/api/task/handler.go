@@ -49,7 +49,17 @@ func (h *TaskHandler) GetTaskStatus(c *gin.Context) {
 	c.JSON(200, gin.H{"status": status})
 }
 
+func (h *TaskHandler) GetTask(c *gin.Context) {
+	id := c.Query("id")
+	status, err := h.service.GetTask(id)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+	}
+	c.JSON(200, status)
+}
+
 func (h *TaskHandler) registerEndpoints(rg *gin.RouterGroup) {
 	rg.POST("", h.CreateTask)
+	rg.GET("", h.GetTask)
 	rg.GET("/status", h.GetTaskStatus)
 }

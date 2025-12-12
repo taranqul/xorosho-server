@@ -142,6 +142,21 @@ services:
     volumes:
       - ./kafka-init/init-kafka.sh:/kafka-init.sh:ro
     command: ["/bin/bash", "/kafka-init.sh"]
+
+  stub-nofile-handler:
+    build:
+      context: ./stub-nofile-handler
+      dockerfile: Dockerfile
+    image: stub-nofile-handler
+    container_name: stub-nofile-handler
+    expose:
+      - "8080"
+    env_file:
+      - ./stub-nofile-handler/.env.example
+    depends_on:
+      minio:
+        condition: service_healthy
+
 volumes:
   mongo-data:
   minio-storage:

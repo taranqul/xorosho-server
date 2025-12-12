@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"sync"
 	"task-dispatcher-service/internal/controllers/kafka/consumers"
 	"task-dispatcher-service/internal/deps"
 	"task-dispatcher-service/internal/infra/config"
@@ -31,15 +30,11 @@ func NewOrchestrator(cfg *config.Config, logger *zap.Logger, deps *deps.Containe
 }
 
 func (o *KafkaOrchestrator) Start() {
-	var wg sync.WaitGroup
 
 	for _, c := range o.consumers {
-		wg.Add(1)
 		go func(c Consumer) {
-			defer wg.Done()
 			c.Start(o.ctx)
 		}(c)
 	}
 
-	wg.Wait()
 }

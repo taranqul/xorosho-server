@@ -62,6 +62,10 @@ func (s *TaskService) GetTaskStatus(id string) (*string, error) {
 	return s.task_repository.GetStatus(id)
 }
 
+func (s *TaskService) GetTask(id string) (*domain.TaskInRepository, error) {
+	return s.task_repository.Get(id)
+}
+
 func (s *TaskService) HandleUploadedFile(uploaded_file domain.UploadedFilesMessage) {
 	task, err := s.task_repository.Get(uploaded_file.TaskID)
 	if err != nil {
@@ -90,6 +94,14 @@ func (s *TaskService) HandleUploadedFile(uploaded_file domain.UploadedFilesMessa
 
 	if ready_to_init {
 		s.initTask(task)
+	}
+}
+
+func (s *TaskService) HandleResult(task domain.TaskInRepository) {
+	err := s.task_repository.Put(task)
+	if err != nil {
+		s.logger.Sugar().Errorf("result with %v cant putted: %v", task.Id, err)
+		return
 	}
 }
 

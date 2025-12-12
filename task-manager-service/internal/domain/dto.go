@@ -8,11 +8,11 @@ type Task struct {
 }
 
 type TaskInRepository struct {
-	Id      string            `bson:"_id"`
-	Status  string            `bson:"status"`
-	Type    string            `bson:"type"`
-	Objects map[string]string `bson:"objects"`
-	Payload map[string]any    `bson:"payload"`
+	Id      string            `bson:"_id" json:"id"`
+	Status  string            `bson:"status" json:"status"`
+	Type    string            `bson:"type"  json:"type"`
+	Objects map[string]string `bson:"objects" json:"objects"`
+	Payload map[string]any    `bson:"payload" json:"payload"`
 }
 
 type UploadedFilesMessage struct {

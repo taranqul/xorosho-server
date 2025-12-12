@@ -8,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import edu.xorosho.api_gateway.domains.tasks.models.TaskManagerRequest;
+import edu.xorosho.api_gateway.domains.tasks.dto.Task;
 
 @Service
 @AllArgsConstructor
@@ -69,5 +71,29 @@ public class TaskManager {
         String value = valueNode.asText();
 
         return value;
+    }
+
+    @SneakyThrows
+    public Task getTask(String id) {
+        String query = "id=" + URLEncoder.encode(id.toString(), StandardCharsets.UTF_8);
+
+        URI uri = new URI("http://task-manager-service:8080/task" + "?" + query);
+
+        HttpClient client = HttpClient.newHttpClient();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .GET()
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String responseBody = response.body();
+
+        Task task = mapper.readValue(responseBody, Task.class);
+
+        if (task.getId() == null) {
+            throw new RuntimeException("cant read json, empty id");
+        }
+
+        return task;
     }
 }

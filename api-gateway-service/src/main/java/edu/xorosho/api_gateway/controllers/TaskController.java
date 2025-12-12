@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.xorosho.api_gateway.domains.tasks.dto.TaskRequest;
 import edu.xorosho.api_gateway.domains.tasks.dto.TaskResponse;
 import edu.xorosho.api_gateway.domains.tasks.dto.TaskSchemaResponse;
+import edu.xorosho.api_gateway.domains.tasks.dto.Task;
 import edu.xorosho.api_gateway.domains.tasks.service.TaskSchemeValidator;
 import edu.xorosho.api_gateway.domains.tasks.service.TaskService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,7 +36,12 @@ public class TaskController {
         taskSchemeValidator.validateScheme(request);
         return taskService.createTask(request);
     }
-    
+
+    @GetMapping("/{task}")
+    public Task getTask(@PathVariable String task) {
+        return taskService.getTask(task);
+    }
+
     @GetMapping("/{task}/schema")
     public TaskSchemaResponse getTaskSchemas(@PathVariable String task) {
         return new TaskSchemaResponse(taskSchemeValidator.getTaskSchema(task).getSchema());

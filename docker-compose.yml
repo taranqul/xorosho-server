@@ -37,7 +37,21 @@ services:
         condition: service_healthy
       kafka-init:
         condition: service_completed_successfully
-
+  task-dispatcher-service:
+    build:
+      context: ./task-dispatcher-service
+      dockerfile: Dockerfile
+    image: task-dispatcher-service
+    container_name: task-dispatcher-service
+    expose:
+      - "8080"
+    env_file:
+      - ./task-dispatcher-service/.env.example
+    depends_on:
+      minio:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
   storage-notifications-service:
     build:
       context: ./storage-notifications-service
@@ -126,7 +140,7 @@ services:
     environment:
       KAFKA_BROKER: "kafka:9092"
     volumes:
-      - ./kafka-init/kafka-init.sh:/kafka-init.sh
+      - ./kafka-init/init-kafka.sh:/kafka-init.sh:ro
     command: ["/bin/bash", "/kafka-init.sh"]
 volumes:
   mongo-data:

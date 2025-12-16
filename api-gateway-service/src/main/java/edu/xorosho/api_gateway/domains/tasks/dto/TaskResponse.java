@@ -9,5 +9,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class TaskResponse {
    private String task_id;
-   private Map<String, Object> objeccts;
+   private Map<String, Object> objects;
 }

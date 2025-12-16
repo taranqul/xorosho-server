@@ -1,0 +1,41 @@
+@startuml
+skinparam componentStyle rectangle
+
+component "API Gateway" as api
+component "Task Manager" as tm
+component "Task Dispatcher" as td
+component "Handler Manager" as hm
+component "Storage Gateway" as sg
+component "Object Storage (S3)" as s3
+component "Storage Notification" as sn
+
+component "Kafka" as kafka {
+  component "tasks"
+  component "upload_files"
+  component "task_result"
+}
+
+component "Task Handler" as handler
+
+api --> tm : createTask()
+api --> sg : requestUploadURL()
+
+sg --> s3 : presigned URL
+
+s3 --> sn : upload completed
+sn --> kafka.upload_files : publish event
+
+kafka.upload_files --> tm : file uploaded
+
+tm --> kafka.tasks : publish task
+kafka.tasks --> td : consume task
+
+td --> hm : resolve handler
+td --> handler : dispatch task
+
+handler --> s3 : read/write files
+handler --> kafka.task_result : publish result
+
+kafka.task_result --> tm : update state
+
+@enduml

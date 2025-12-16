@@ -1,0 +1,32 @@
+@startuml
+actor Client
+
+participant "API Gateway" as api
+participant "Task Manager" as tm
+participant "Storage Gateway" as sg
+participant "Object Storage" as s3
+participant "Kafka" as kafka
+participant "Task Dispatcher" as td
+participant "Handler" as handler
+
+Client -> api : POST /tasks
+api -> tm : registerTask()
+api -> sg : getUploadURL()
+
+Client -> s3 : upload file (presigned URL)
+s3 -> kafka : upload_files event
+
+kafka -> tm : upload_files
+tm -> kafka : publish task
+
+kafka -> td : task event
+td -> handler : dispatch task
+
+handler -> s3 : read input
+handler -> s3 : write result
+handler -> kafka : task_result
+
+kafka -> tm : task_result
+tm -> api : update task status
+
+@enduml

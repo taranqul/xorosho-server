@@ -32,6 +32,18 @@
 
 ### API Gateway
 
+Стек:
+
+- Java 17+
+
+- Spring Boot
+
+- Springdoc OpenAPI (Swagger)
+
+- WebClient
+
+- Jackson
+
 Служит точкой входа для внешних клиентов.
 
 Основные обязанности:

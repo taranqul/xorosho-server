@@ -66,6 +66,20 @@ services:
       minio:
         condition: service_healthy
 
+  worker-manager-service:
+    build:
+      context: ./worker-manager-service
+      dockerfile: Dockerfile
+    image: worker-manager-service
+    container_name: worker-manager-service
+    expose:
+      - "8080"
+    env_file:
+      - ./worker-manager-service/.env.example
+    depends_on:
+      kafka:
+        condition: service_healthy
+
   minio:
     image: minio/minio:latest
     command: server --console-address ":9001" /data/
@@ -104,6 +118,17 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
       - mongo-data:/data/db
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass secretpass --save 60 1 --loglevel warning
+    
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
@@ -154,10 +179,11 @@ services:
     env_file:
       - ./stub-nofile-handler/.env.example
     depends_on:
-      minio:
-        condition: service_healthy
+      worker-manager-service:
+        condition: service_started
 
 volumes:
   mongo-data:
   minio-storage:
   kafka-data:
+  redis_data:

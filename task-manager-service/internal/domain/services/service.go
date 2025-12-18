@@ -106,7 +106,6 @@ func (s *TaskService) HandleResult(task domain.TaskInRepository) {
 }
 
 func (s *TaskService) initTask(task *domain.TaskInRepository) {
-	s.logger.Sugar().Infof("not implemented yet: %v", task.Id)
 	err := s.task_producer.Write(domain.Task{
 		Id:      task.Id,
 		Type:    task.Type,

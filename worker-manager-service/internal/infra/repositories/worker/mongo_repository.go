@@ -41,7 +41,16 @@ func NewMongoRepository(ctx context.Context, logger *zap.Logger, mongoURI string
 
 func (r *MongoRepository) Create(worker *dto.WorkerRegister) error {
 
-	_, err := r.collection.InsertOne(r.ctx, worker)
+	filter := bson.M{"_id": worker.Name}
+	update := bson.M{
+		"$set": bson.M{
+			"webhook": worker.Webhook,
+			"scheme":  worker.Scheme,
+		},
+	}
+
+	_, err := r.collection.UpdateOne(r.ctx, filter, update, options.Update().SetUpsert(true))
+
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
 			return nil

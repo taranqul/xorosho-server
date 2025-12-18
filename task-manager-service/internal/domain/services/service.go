@@ -50,7 +50,7 @@ func (s *TaskService) CreateTask(task domain.Task) (*uuid.UUID, error) {
 		s.logger.Sugar().Errorf("task wasnt created: %v", to_create.Id)
 		return nil, err
 	}
-
+	s.logger.Sugar().Infof("status: %t", ready_to_init)
 	if ready_to_init {
 		s.initTask(&to_create)
 	}
@@ -112,7 +112,7 @@ func (s *TaskService) initTask(task *domain.TaskInRepository) {
 		Objects: task.Objects,
 		Payload: task.Payload,
 	})
-
+	
 	if err != nil {
 		s.logger.Sugar().Errorf("task with %v wasnt initiated", task.Id)
 		return

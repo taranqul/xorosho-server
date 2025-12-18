@@ -23,5 +23,14 @@ func NewWorkerService(webhook_repository webhook.IWebhookRepository, worker_repo
 }
 
 func (w *WorkerService) RegisterService(worker dto.WorkerRegister) error {
-	return w.webhook_repository.Set(worker.Name, worker.Webhook)
+	err := w.webhook_repository.Set(worker.Name, worker.Webhook)
+	if err != nil {
+		return err
+	}
+
+	err = w.worker_repository.Create(&worker)
+	if err != nil {
+		return err
+	}
+	return nil
 }

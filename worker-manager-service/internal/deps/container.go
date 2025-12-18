@@ -25,6 +25,9 @@ func NewContainer(cfg config.Config, logger *zap.Logger) *Container {
 		panic(err)
 	}
 	worker_service, err := service.NewWorkerService(webhook_repo, worker_repo, logger)
+	if err != nil {
+		panic(err)
+	}
 	return &Container{worker_service: worker_service}
 
 }

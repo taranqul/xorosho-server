@@ -10,4 +10,5 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o stub-nofile-handler ./cmd
 FROM gcr.io/distroless/static
 
 COPY --from=builder /app/stub-nofile-handler  /stub-nofile-handler
+COPY --from=builder /app/resources /resources
 ENTRYPOINT ["/stub-nofile-handler"]

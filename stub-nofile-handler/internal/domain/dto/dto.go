@@ -17,3 +17,9 @@ type ResultTask struct {
 type Result struct {
 	Trace string
 }
+
+type WorkerRegister struct {
+	Name    string         `json:"name"`
+	Webhook string         `json:"webhook"`
+	Scheme  map[string]any `json:"scheme"`
+}

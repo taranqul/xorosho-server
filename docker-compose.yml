@@ -35,8 +35,6 @@ services:
     depends_on:
       minio:
         condition: service_healthy
-      kafka-init:
-        condition: service_completed_successfully
   task-dispatcher-service:
     build:
       context: ./task-dispatcher-service
@@ -50,8 +48,7 @@ services:
     depends_on:
       minio:
         condition: service_healthy
-      kafka-init:
-        condition: service_completed_successfully
+        
   storage-notifications-service:
     build:
       context: ./storage-notifications-service
@@ -157,17 +154,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-  kafka-init:
-    image: confluentinc/cp-kafka:latest
-    depends_on:
-      kafka:
-        condition: service_healthy
-    environment:
-      KAFKA_BROKER: "kafka:9092"
-    volumes:
-      - ./kafka-init/init-kafka.sh:/kafka-init.sh:ro
-    command: ["/bin/bash", "/kafka-init.sh"]
-
   stub-nofile-handler:
     build:
       context: ./stub-nofile-handler

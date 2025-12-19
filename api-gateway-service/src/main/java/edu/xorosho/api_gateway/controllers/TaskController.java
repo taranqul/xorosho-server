@@ -11,6 +11,7 @@ import edu.xorosho.api_gateway.domains.tasks.service.TaskSchemeValidator;
 import edu.xorosho.api_gateway.domains.tasks.service.TaskService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +33,7 @@ public class TaskController {
 
 
     @PostMapping()
-    public TaskResponse postTask(@RequestBody TaskRequest request) {
+    public TaskResponse postTask(@RequestBody TaskRequest request) throws Exception {
         taskSchemeValidator.validateScheme(request);
         return taskService.createTask(request);
     }
@@ -43,8 +44,9 @@ public class TaskController {
     }
 
     @GetMapping("/{task}/schema")
+    @SneakyThrows
     public TaskSchemaResponse getTaskSchemas(@PathVariable String task) {
-        return new TaskSchemaResponse(taskSchemeValidator.getTaskSchema(task).getSchema());
+        return new TaskSchemaResponse(taskSchemeValidator.getSchema(task));
     }
     
     @GetMapping("/{task}/status")
@@ -53,6 +55,7 @@ public class TaskController {
     }
 
     @GetMapping()
+    @SneakyThrows
     public List<String> getTasks() {
         return taskSchemeValidator.getTasks();
     }

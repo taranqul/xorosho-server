@@ -50,7 +50,7 @@ func (s *TaskService) CreateTask(task domain.Task) (*uuid.UUID, error) {
 		s.logger.Sugar().Errorf("task wasnt created: %v", to_create.Id)
 		return nil, err
 	}
-
+	s.logger.Sugar().Infof("status: %t", ready_to_init)
 	if ready_to_init {
 		s.initTask(&to_create)
 	}
@@ -106,14 +106,13 @@ func (s *TaskService) HandleResult(task domain.TaskInRepository) {
 }
 
 func (s *TaskService) initTask(task *domain.TaskInRepository) {
-	s.logger.Sugar().Infof("not implemented yet: %v", task.Id)
 	err := s.task_producer.Write(domain.Task{
 		Id:      task.Id,
 		Type:    task.Type,
 		Objects: task.Objects,
 		Payload: task.Payload,
 	})
-
+	
 	if err != nil {
 		s.logger.Sugar().Errorf("task with %v wasnt initiated", task.Id)
 		return

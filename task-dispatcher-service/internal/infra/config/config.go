@@ -12,6 +12,7 @@ type Config struct {
 	GroupID      string   `env:"GROUP_ID"`
 	Brokers      []string `env:"BROKERS" envSeparator:","`
 	KafkaAddress string   `env:"KAFKA_ADDRESS"`
+	RedisDSN     string   `env:"REDIS_DSN" required:"true"`
 }
 
 func LoadConfig() (*Config, error) {

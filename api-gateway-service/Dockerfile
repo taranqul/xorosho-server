@@ -12,6 +12,7 @@ FROM eclipse-temurin:21-jre AS runtime
 
 WORKDIR /app
 
-COPY --from=builder /app/build/libs/*.jar app.jar
+COPY --from=builder /app/build/libs/ ./libs/
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+ENTRYPOINT ["java", "-jar", "./libs/api-gateway-service-0.0.1-SNAPSHOT.jar"]

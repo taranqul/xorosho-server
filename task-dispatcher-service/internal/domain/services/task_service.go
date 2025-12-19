@@ -6,33 +6,42 @@ import (
 	"net/http"
 	"task-dispatcher-service/internal/domain/dto"
 	"task-dispatcher-service/internal/infra/kafka/producers"
+	"task-dispatcher-service/internal/infra/repositories/webhook"
 
 	"go.uber.org/zap"
 )
 
 type TaskService struct {
-	logger          *zap.Logger
-	result_producer *producers.ResultProducer
+	logger             *zap.Logger
+	result_producer    *producers.ResultProducer
+	webhook_repository webhook.IWebhookRepository
 }
 
-func NewTaskService(result_producer *producers.ResultProducer, logger *zap.Logger) (*TaskService, error) {
+func NewTaskService(webhook_repository webhook.IWebhookRepository, result_producer *producers.ResultProducer, logger *zap.Logger) (*TaskService, error) {
 	return &TaskService{
-		logger:          logger,
-		result_producer: result_producer,
+		logger:             logger,
+		result_producer:    result_producer,
+		webhook_repository: webhook_repository,
 	}, nil
 }
 
 func (s *TaskService) DispatchTask(task dto.Task) {
-
+	s.logger.Sugar().Info(task)
 	jsonData, err := json.Marshal(task)
 	if err != nil {
-		panic(err)
+		return
 	}
 
-	resp, err := http.Post("http://stub-nofile-handler:8080/task", "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		panic(err)
+	webhook, err := s.webhook_repository.Get(task.Type)
+	if err != nil || webhook == "" {
+		return
 	}
+
+	resp, err := http.Post(webhook, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return
+	}
+
 	defer resp.Body.Close()
 	s.logger.Sugar().Info(resp.Status)
 }

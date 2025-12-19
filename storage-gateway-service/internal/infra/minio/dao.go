@@ -18,17 +18,17 @@ type MinioDAO struct {
 	ctx    *context.Context
 }
 
-func NewMinioDAO(cfg config.Config, ctx *context.Context) *MinioDAO {
+func NewMinioDAO(cfg config.Config, MinioExternalEndpoint string, MinioEndpoint string, ctx *context.Context) *MinioDAO {
 	tr := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			if strings.Contains(addr, cfg.MinioExternalEndpoint) {
-				addr = cfg.MinioEndpoint
+			if strings.Contains(addr, MinioExternalEndpoint) {
+				addr = MinioEndpoint
 			}
 			return (&net.Dialer{}).DialContext(ctx, "tcp4", addr)
 		},
 	}
 
-	client, err := minio.New(cfg.MinioExternalEndpoint, &minio.Options{
+	client, err := minio.New(MinioExternalEndpoint, &minio.Options{
 		Creds:     credentials.NewStaticV4(cfg.MinioAccessKeyID, cfg.MinioSecretAccessKey, ""),
 		Secure:    cfg.MinIoUseSSL,
 		Region:    "us-east-1",

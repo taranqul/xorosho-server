@@ -1,49 +1,92 @@
 package edu.xorosho.api_gateway.domains.tasks.service;
-
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion.VersionFlag;
-import com.networknt.schema.ValidationMessage;
+
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import edu.xorosho.api_gateway.domains.tasks.dto.TaskRequest;
-import edu.xorosho.api_gateway.domains.tasks.exeptions.TaskSchemaNotValid;
-import edu.xorosho.api_gateway.domains.tasks.models.TaskSchema;
-import edu.xorosho.api_gateway.domains.tasks.repositories.TaskSchemaRepository;
 import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
 public class TaskSchemeValidator {
-    private final TaskSchemaRepository task_scheme_repository;
-    private final ObjectMapper mapper = new ObjectMapper();
-    private final JsonSchemaFactory FACTORY = JsonSchemaFactory.getInstance(VersionFlag.V202012);
-    public void validateScheme(TaskRequest request) {
-     
-        TaskSchema schema = this.task_scheme_repository.getSchema(request.getTask_type()); 
-        
 
-        JsonSchema jsonSchema = FACTORY.getSchema(schema.getSchema());
-        ObjectNode data = mapper.createObjectNode();
-        data.set("objects", mapper.valueToTree(request.getObjects()));
-        data.set("payload", request.getPayload());
-        Set<ValidationMessage> errors = jsonSchema.validate(data);
-        if (!errors.isEmpty()) {
-            throw new TaskSchemaNotValid();
+    private final ObjectMapper objectMapper;
+    private final HttpClient client = HttpClient.newHttpClient();
+    public void validateScheme(TaskRequest request) throws Exception {
+
+        String body = objectMapper.writeValueAsString(request);
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://worker-manager-service:8080/worker/validate"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+
+        HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Validation failed with status: " + response.statusCode());
         }
     }
-    
-    public TaskSchema getTaskSchema(String name) {
-        return this.task_scheme_repository.getSchema(name); 
+
+    public List<String> getTasks() throws Exception {
+        URI uri = URI.create("http://worker-manager-service:8080/worker");
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .GET()
+                .header("Accept", "application/json")
+                .build();
+
+        HttpResponse<String> response =
+                client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException(
+                    "Request failed, status=" + response.statusCode()
+            );
+        }
+
+        return objectMapper.readValue(
+                response.body(),
+                new TypeReference<List<String>>() {}
+        );
     }
 
-    public List<String> getTasks(){
-        return this.task_scheme_repository.getTasks();
+    public JsonNode getSchema(String name) throws Exception {
+        String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
+
+        URI uri = URI.create(
+                "http://worker-manager-service:8080/task/scheme?name=" + encodedName
+        );
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .GET()
+                .header("Accept", "application/json")
+                .build();
+
+        HttpResponse<String> response =
+                client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException(
+                    "Request failed, status=" + response.statusCode()
+            );
+        }
+
+        JsonNode jsonNode = objectMapper.readTree(response.body());
+
+        return jsonNode;
     }
 }

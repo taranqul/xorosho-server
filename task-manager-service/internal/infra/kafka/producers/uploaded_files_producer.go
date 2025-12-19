@@ -3,7 +3,10 @@ package producers
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"os"
 	"task-manager-service/internal/domain"
+	"time"
 
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
@@ -16,9 +19,11 @@ type TasksProducer struct {
 
 func NewTasksProducer(addres string, logger *zap.Logger) *TasksProducer {
 	writer := &kafka.Writer{
-		Addr:     kafka.TCP(addres),
-		Topic:    "tasks",
-		Balancer: &kafka.LeastBytes{},
+		Addr:        kafka.TCP(addres),
+		Topic:       "tasks",
+		Balancer:    &kafka.LeastBytes{},
+		Logger:      log.New(os.Stdout, "kafka writer: ", log.LstdFlags),
+		ErrorLogger: log.New(os.Stderr, "kafka error: ", log.LstdFlags),
 	}
 	return &TasksProducer{
 		writer: writer,
@@ -37,8 +42,10 @@ func (p *TasksProducer) Write(task domain.Task) error {
 		Key:   []byte(task.Id),
 		Value: jsonBytes,
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	if err := p.writer.WriteMessages(context.Background(), msg); err != nil {
+	if err := p.writer.WriteMessages(ctx, msg); err != nil {
 		p.logger.Sugar().Errorf("failed to write message: %v", err)
 		return err
 	}

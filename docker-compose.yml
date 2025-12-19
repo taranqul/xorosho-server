@@ -35,8 +35,6 @@ services:
     depends_on:
       minio:
         condition: service_healthy
-      kafka-init:
-        condition: service_completed_successfully
   task-dispatcher-service:
     build:
       context: ./task-dispatcher-service
@@ -50,8 +48,7 @@ services:
     depends_on:
       minio:
         condition: service_healthy
-      kafka-init:
-        condition: service_completed_successfully
+        
   storage-notifications-service:
     build:
       context: ./storage-notifications-service
@@ -64,6 +61,20 @@ services:
       - ./storage-notifications-service/.env.example
     depends_on:
       minio:
+        condition: service_healthy
+
+  worker-manager-service:
+    build:
+      context: ./worker-manager-service
+      dockerfile: Dockerfile
+    image: worker-manager-service
+    container_name: worker-manager-service
+    expose:
+      - "8080"
+    env_file:
+      - ./worker-manager-service/.env.example
+    depends_on:
+      kafka:
         condition: service_healthy
 
   minio:
@@ -104,6 +115,17 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
       - mongo-data:/data/db
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass secretpass --save 60 1 --loglevel warning
+    
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
@@ -132,17 +154,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-  kafka-init:
-    image: confluentinc/cp-kafka:latest
-    depends_on:
-      kafka:
-        condition: service_healthy
-    environment:
-      KAFKA_BROKER: "kafka:9092"
-    volumes:
-      - ./kafka-init/init-kafka.sh:/kafka-init.sh:ro
-    command: ["/bin/bash", "/kafka-init.sh"]
-
   stub-nofile-handler:
     build:
       context: ./stub-nofile-handler
@@ -154,10 +165,25 @@ services:
     env_file:
       - ./stub-nofile-handler/.env.example
     depends_on:
-      minio:
-        condition: service_healthy
+      worker-manager-service:
+        condition: service_started
+  
+  stub-file-handler:
+    build:
+      context: ./stub-file-handler
+      dockerfile: Dockerfile
+    image: stub-file-handler
+    container_name: stub-file-handler
+    expose:
+      - "8080"
+    env_file:
+      - ./stub-file-handler/.env.example
+    depends_on:
+      worker-manager-service:
+        condition: service_started
 
 volumes:
   mongo-data:
   minio-storage:
   kafka-data:
+  redis_data:

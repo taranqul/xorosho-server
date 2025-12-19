@@ -1,25 +1,43 @@
 package domain
 
 type GatewayService struct {
-	storage S3Compatibile
+	external_storage S3Compatibile
+	internal_storage S3Compatibile
 }
 
-func NewGatewayService(storage S3Compatibile) *GatewayService {
+func NewGatewayService(external_storage S3Compatibile, internal_storage S3Compatibile) *GatewayService {
 	return &GatewayService{
-		storage,
+		external_storage,
+		internal_storage,
 	}
 }
 
-func (g *GatewayService) GetUploadUrl(filename string, bucketname string) (string, error) {
-	url, err := g.storage.GetUploadUrl(filename, bucketname)
+func (g *GatewayService) GetExtUploadUrl(filename string, bucketname string) (string, error) {
+	url, err := g.external_storage.GetUploadUrl(filename, bucketname)
 	if err != nil {
 		return "", err
 	}
 	return url, nil
 }
 
-func (g *GatewayService) GetDownloadUrl(filename string, bucketname string) (string, error) {
-	url, err := g.storage.GetDownloadUrl(filename, bucketname)
+func (g *GatewayService) GetExtDownloadUrl(filename string, bucketname string) (string, error) {
+	url, err := g.external_storage.GetDownloadUrl(filename, bucketname)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
+}
+
+func (g *GatewayService) GetIntUploadUrl(filename string, bucketname string) (string, error) {
+	url, err := g.internal_storage.GetUploadUrl(filename, bucketname)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
+}
+
+func (g *GatewayService) GetIntDownloadUrl(filename string, bucketname string) (string, error) {
+	url, err := g.internal_storage.GetDownloadUrl(filename, bucketname)
 	if err != nil {
 		return "", err
 	}

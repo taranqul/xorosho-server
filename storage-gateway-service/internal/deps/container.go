@@ -14,8 +14,9 @@ type Container struct {
 
 func NewContainer(cfg config.Config) *Container {
 	ctx := context.Background()
-	minio_storage := minio.NewMinioDAO(cfg, &ctx)
-	service := domain.NewGatewayService(minio_storage)
+	ext_minio_storage := minio.NewMinioDAO(cfg, cfg.MinioExternalEndpoint, cfg.MinioEndpoint, &ctx)
+	int_minio_storage := minio.NewMinioDAO(cfg, cfg.MinioEndpoint, cfg.MinioEndpoint, &ctx)
+	service := domain.NewGatewayService(ext_minio_storage, int_minio_storage)
 	return &Container{
 		service: service,
 	}

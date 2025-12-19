@@ -167,6 +167,20 @@ services:
     depends_on:
       worker-manager-service:
         condition: service_started
+  
+  stub-file-handler:
+    build:
+      context: ./stub-file-handler
+      dockerfile: Dockerfile
+    image: stub-file-handler
+    container_name: stub-file-handler
+    expose:
+      - "8080"
+    env_file:
+      - ./stub-file-handler/.env.example
+    depends_on:
+      worker-manager-service:
+        condition: service_started
 
 volumes:
   mongo-data:

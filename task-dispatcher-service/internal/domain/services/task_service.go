@@ -26,7 +26,7 @@ func NewTaskService(webhook_repository webhook.IWebhookRepository, result_produc
 }
 
 func (s *TaskService) DispatchTask(task dto.Task) {
-
+	s.logger.Sugar().Info(task)
 	jsonData, err := json.Marshal(task)
 	if err != nil {
 		return

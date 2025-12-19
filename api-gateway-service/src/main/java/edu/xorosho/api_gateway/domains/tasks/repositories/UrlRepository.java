@@ -15,7 +15,7 @@ import lombok.SneakyThrows;
 
 @Repository
 public class UrlRepository {
-    private final static String baseUrl = "http://storage-gateway-service:8080/storage/uploadUrl";
+    private final static String baseUrl = "http://storage-gateway-service:8080/storage/external/uploadUrl";
     private final static ObjectMapper mapper = new ObjectMapper();
     @SneakyThrows
     public String getUrl(String file){

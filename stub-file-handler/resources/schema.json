@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+
+  "properties": {
+    "objects": {
+      "type": "object",
+      "properties": {
+        "edit": {
+          "type": "string",
+          "enum": [".txt"]
+        },
+        "edit2": {
+          "type": "string",
+          "enum": [".txt"]
+        }
+      },
+      "required": ["edit", "edit2"],
+      "additionalProperties": false
+    },
+
+    "payload": {
+      "type": "object",
+      "properties": {
+        "trace": {
+          "type": "string"
+        }
+      },
+      "required": ["trace"],
+      "additionalProperties": false
+    }
+  },
+
+  "required": ["objects", "payload"],
+  "additionalProperties": false
+}

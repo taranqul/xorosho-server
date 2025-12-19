@@ -1,11 +1,15 @@
 package dto
 
-type StubNoFileTask struct {
+type StubFileTask struct {
 	Id      string
+	Objects struct {
+		Edit string `json:"edit"`
+	} `json:"objects"`
 	Payload struct {
 		Trace string `json:"trace"`
 	} `json:"payload"`
 }
+
 type ResultTask struct {
 	Id      string
 	Type    string

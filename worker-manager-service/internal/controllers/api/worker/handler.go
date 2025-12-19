@@ -40,11 +40,57 @@ func (w *WorkerHandler) RegisterWorker(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (*WorkerHandler) ValidateScheme(c *gin.Context) {
-	c.Status(http.StatusNotImplemented)
+func (w *WorkerHandler) ValidateScheme(c *gin.Context) {
+	var worker_scheme dto.TaskRequest
+
+	if err := c.BindJSON(&worker_scheme); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res, err := w.worker_service.ValidateScheme(worker_scheme)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !res {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
+func (w *WorkerHandler) GetScheme(c *gin.Context) {
+	name := c.Query("name")
+	if name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "query parameter 'name' is required",
+		})
+		return
+	}
+	scheme, err := w.worker_service.GetScheme(name)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	c.JSON(http.StatusOK, scheme)
+}
+
+func (w *WorkerHandler) GetTasks(c *gin.Context) {
+	list, err := w.worker_service.GetTasks()
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, list)
 }
 
 func (h *WorkerHandler) registerEndpoints(rg *gin.RouterGroup) {
 	rg.POST("", h.RegisterWorker)
 	rg.POST("/validate", h.ValidateScheme)
+	rg.GET("", h.GetTasks)
+	rg.GET("/scheme", h.GetScheme)
 }

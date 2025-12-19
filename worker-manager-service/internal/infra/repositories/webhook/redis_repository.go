@@ -36,6 +36,26 @@ func (r *RedisRepository) Get(key string) (string, error) {
 	return val, err
 }
 
+func (r *RedisRepository) Scan() ([]string, error) {
+	var cursor uint64
+	var keys []string
+
+	for {
+		batch, nextCursor, err := r.client.Scan(r.ctx, cursor, "*", 100).Result()
+		if err != nil {
+			return nil, err
+		}
+
+		keys = append(keys, batch...)
+		cursor = nextCursor
+
+		if cursor == 0 {
+			break
+		}
+	}
+	return keys, nil
+}
+
 func (r *RedisRepository) Set(key string, value string) error {
 	return r.client.Set(r.ctx, key, value, time.Minute*30).Err()
 }

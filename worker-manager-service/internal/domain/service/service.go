@@ -5,6 +5,7 @@ import (
 	"worker-manager-service/internal/infra/repositories/webhook"
 	"worker-manager-service/internal/infra/repositories/worker"
 
+	"github.com/xeipuuv/gojsonschema"
 	"go.uber.org/zap"
 )
 
@@ -33,4 +34,43 @@ func (w *WorkerService) RegisterService(worker dto.WorkerRegister) error {
 		return err
 	}
 	return nil
+}
+
+func (w *WorkerService) ValidateScheme(request dto.TaskRequest) (bool, error) {
+	merged := map[string]any{
+		"objects": request.Objects,
+		"payload": request.Payload,
+	}
+	worker, err := w.worker_repository.Read(request.Type)
+	if err != nil {
+		return false, err
+	}
+	schemaLoader := gojsonschema.NewGoLoader(worker.Scheme)
+	documentLoader := gojsonschema.NewGoLoader(merged)
+
+	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+
+	if err != nil {
+		return false, err
+	}
+
+	if !result.Valid() {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (w *WorkerService) GetTasks() ([]string, error) {
+	return w.webhook_repository.Scan()
+}
+
+func (w *WorkerService) GetScheme(name string) (map[string]any, error) {
+	worker, err := w.worker_repository.Read(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return worker.Scheme, nil
 }

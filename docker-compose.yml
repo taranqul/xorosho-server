@@ -89,7 +89,7 @@ services:
       MINIO_NOTIFY_WEBHOOK_ENABLE_PRIMARY: on
       MINIO_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY: http://storage-notifications-service:8080/webhook/
     volumes:
-      - minio-storage:/data
+      - minio-xorosho-storage:/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -107,6 +107,7 @@ services:
 
   mongo:
     image: mongo:7
+    container_name: mongo-xorosho
     restart: always
     ports:
       - "27017:27017"
@@ -114,21 +115,21 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - mongo-data:/data/db
+      - mongo-xorosho-data:/data/db
 
   redis:
     image: redis:7
-    container_name: redis
+    container_name: redis-xorosho
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redis-xorosho-data:/data
     command: redis-server --requirepass secretpass --save 60 1 --loglevel warning
     
   kafka:
     image: confluentinc/cp-kafka:latest
-    container_name: kafka
+    container_name: kafka-xorosho
     ports:
       - "29092:29092"
     environment:
@@ -136,11 +137,11 @@ services:
       KAFKA_PROCESS_ROLES: "broker,controller"
       KAFKA_NODE_ID: 1
       KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-xorosho:9092,PLAINTEXT_HOST://localhost:29092"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT"
       
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-xorosho:9093"
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
 
       KAFKA_NUM_PARTITIONS: 1
@@ -148,7 +149,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_LOG_DIRS: "/var/lib/kafka/data" 
     volumes:
-      - kafka-data:/var/lib/kafka/data
+      - kafka-xorosho-data:/var/lib/kafka/data
     healthcheck:
       test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
       interval: 10s
@@ -183,7 +184,7 @@ services:
         condition: service_started
 
 volumes:
-  mongo-data:
-  minio-storage:
-  kafka-data:
-  redis_data:
+  mongo-xorosho-data:
+  minio-xorosho-storage:
+  kafka-xorosho-data:
+  redis-xorosho-data:

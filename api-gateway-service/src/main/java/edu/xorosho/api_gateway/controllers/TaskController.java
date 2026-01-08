@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.xorosho.api_gateway.domains.tasks.dto.TaskRequest;
 import edu.xorosho.api_gateway.domains.tasks.dto.TaskResponse;
+import edu.xorosho.api_gateway.domains.tasks.dto.TaskResult;
 import edu.xorosho.api_gateway.domains.tasks.dto.TaskSchemaResponse;
 import edu.xorosho.api_gateway.domains.tasks.dto.Task;
 import edu.xorosho.api_gateway.domains.tasks.service.TaskSchemeValidator;
@@ -54,12 +55,15 @@ public class TaskController {
         return taskService.getTaskStatus(task);
     }
 
+    @GetMapping("/{task}/result")
+    public TaskResult getTaskResult(@PathVariable String task) {
+        return taskService.getTaskResult(task);
+    }
+
     @GetMapping()
     @SneakyThrows
     public List<String> getTasks() {
         return taskSchemeValidator.getTasks();
     }
 
-    
-    
 }

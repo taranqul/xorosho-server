@@ -67,7 +67,7 @@ public class TaskSchemeValidator {
         String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
 
         URI uri = URI.create(
-                "http://worker-manager-service:8080/task/scheme?name=" + encodedName
+                "http://worker-manager-service:8080/worker/scheme?name=" + encodedName
         );
 
         HttpRequest request = HttpRequest.newBuilder()

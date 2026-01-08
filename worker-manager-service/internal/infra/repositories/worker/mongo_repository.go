@@ -65,16 +65,19 @@ func (r *MongoRepository) Read(name string) (*dto.WorkerRegister, error) {
 	var result *dto.WorkerRegister
 
 	filter := bson.M{"_id": name}
-	err := r.collection.FindOne(r.ctx, filter).Decode(&result)
+	finded := r.collection.FindOne(r.ctx, filter)
 
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, err
+	if finded.Err() != nil {
+		if finded.Err() == mongo.ErrNoDocuments {
+			return nil, nil
 		} else {
-			return nil, err
+			r.logger.Sugar().Error(finded.Err())
+			return nil, finded.Err()
 		}
 	}
 
-	return result, nil
+	err := finded.Decode(&result)
+
+	return result, err
 
 }

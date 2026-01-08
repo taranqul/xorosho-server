@@ -25,7 +25,7 @@ func NewWorkerHandler(service *service.WorkerService, logger *zap.Logger, rg *gi
 
 func (w *WorkerHandler) RegisterWorker(c *gin.Context) {
 	var worker dto.WorkerRegister
-
+	w.logger.Sugar().Debug("registration triggered")
 	if err := c.BindJSON(&worker); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -45,6 +45,11 @@ func (w *WorkerService) ValidateScheme(request dto.TaskRequest) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
+	if worker == nil {
+		return false, nil
+	}
+
 	schemaLoader := gojsonschema.NewGoLoader(worker.Scheme)
 	documentLoader := gojsonschema.NewGoLoader(merged)
 
@@ -68,7 +73,7 @@ func (w *WorkerService) GetTasks() ([]string, error) {
 func (w *WorkerService) GetScheme(name string) (map[string]any, error) {
 	worker, err := w.worker_repository.Read(name)
 
-	if err != nil {
+	if err != nil || worker == nil {
 		return nil, err
 	}
 

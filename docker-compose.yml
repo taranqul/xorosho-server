@@ -184,6 +184,20 @@ services:
       worker-manager-service:
         condition: service_started
 
+  video-converter-handler:
+    build:
+      context: ./video-converter-handler
+      dockerfile: Dockerfile
+    image: video-converter-handler
+    container_name: video-converter-handler
+    expose:
+      - "8080"
+    env_file:
+      - ./video-converter-handler/.env.example
+    depends_on:
+      worker-manager-service:
+        condition: service_started
+
 volumes:
   mongo-xorosho-data:
   minio-xorosho-storage:

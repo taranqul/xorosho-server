@@ -8,7 +8,7 @@
       "properties": {
         "edit": {
           "type": "string",
-          "enum": [".mp4, .mp3, .avi, .webm, .mkv, .mov, .wav"]
+          "enum": [".mp4", ".mp3", ".avi", ".webm", ".mkv", ".mov", ".wav"]
         }
       },
       "required": ["edit"],
@@ -20,7 +20,7 @@
       "properties": {
         "target": {
           "type": "string",
-          "enum": [".mp4, .mp3, .avi, .webm, .mkv, .mov, .wav"]
+          "enum": [".mp4", ".mp3", ".avi", ".webm", ".mkv", ".mov", ".wav"]
         }
       },
       "required": ["target"],

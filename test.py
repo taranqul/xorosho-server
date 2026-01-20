@@ -17,7 +17,7 @@ def upload_file(presigned_url: str, file_name: str, content: str = "Hello, MinIO
     
     os.remove(file_name)
 
-def upload_file_existed(presigned_url: str, file_name: str,):
+def upload_file_existed(presigned_url: str, file_name: str):
 
     with open(file_name, "rb") as f:
         response = requests.put(presigned_url, data=f)
@@ -26,12 +26,10 @@ def upload_file_existed(presigned_url: str, file_name: str,):
         print(f"Файл '{file_name}' успешно загружен!")
     else:
         print(f"Ошибка загрузки: {response.status_code} - {response.text}")
-    
-    os.remove(file_name)
 
 if __name__ == "__main__":
 
-    presigned_url = "http://localhost:9000/upload/ba1ffb4b-2be5-4991-b748-d8bff1b5329f_edit2.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=tarantul%2F20260107%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260107T210531Z&X-Amz-Expires=600&X-Amz-SignedHeaders=host&X-Amz-Signature=e08c9c2f9bd67e5e1ef58f592be50bc0b393e42b47c592f697c0e4ed78236374"
-    file_name = "ba1ffb4b-2be5-4991-b748-d8bff1b5329f_edit2.txt"
+    presigned_url = "http://localhost:9000/upload/ea52affd-83b8-4145-acad-105a17736f30_edit.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=tarantul%2F20260119%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260119T170203Z&X-Amz-Expires=600&X-Amz-SignedHeaders=host&X-Amz-Signature=5bf2a1d969ac152849d68be9b3365bc01b80ab814675ffc6c375c4673c43560b"
+    file_name = "ea52affd-83b8-4145-acad-105a17736f30_edit.mp4"
 
-    upload_file(presigned_url, file_name)
+    upload_file_existed(presigned_url, file_name)

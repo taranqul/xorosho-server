@@ -9,12 +9,13 @@ import (
 )
 
 type RedisRepository struct {
-	client *redis.Client
-	ctx    context.Context
-	logger *zap.Logger
+	client         *redis.Client
+	ctx            context.Context
+	logger         *zap.Logger
+	workerLifeTime int
 }
 
-func NewRedisRepository(dsn string, ctx context.Context, logger *zap.Logger) (*RedisRepository, error) {
+func NewRedisRepository(dsn string, ctx context.Context, logger *zap.Logger, life_time int) (*RedisRepository, error) {
 	opt, err := redis.ParseURL(dsn)
 	if err != nil {
 		return nil, err
@@ -22,9 +23,10 @@ func NewRedisRepository(dsn string, ctx context.Context, logger *zap.Logger) (*R
 
 	rdb := redis.NewClient(opt)
 	return &RedisRepository{
-		client: rdb,
-		ctx:    ctx,
-		logger: logger,
+		client:         rdb,
+		ctx:            ctx,
+		logger:         logger,
+		workerLifeTime: life_time,
 	}, nil
 }
 
@@ -57,7 +59,7 @@ func (r *RedisRepository) Scan() ([]string, error) {
 }
 
 func (r *RedisRepository) Set(key string, value string) error {
-	return r.client.Set(r.ctx, key, value, time.Minute*30).Err()
+	return r.client.Set(r.ctx, key, value, time.Minute*time.Duration(r.workerLifeTime)).Err()
 }
 
 func (r *RedisRepository) Del(key string) error {

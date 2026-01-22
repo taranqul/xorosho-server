@@ -7,11 +7,12 @@ import (
 )
 
 type Config struct {
-	MongoURI string `env:"MONGO_URI" required:"true"`
-	MongoDB  string `env:"MONGO_DB" required:"true"`
-	RedisDSN string `env:"REDIS_DSN" required:"true"`
-	LogLevel string `env:"LOG_LEVEL" envDefault:"INFO"`
-	Port     int    `env:"PORT"`
+	MongoURI       string `env:"MONGO_URI" required:"true"`
+	MongoDB        string `env:"MONGO_DB" required:"true"`
+	RedisDSN       string `env:"REDIS_DSN" required:"true"`
+	LogLevel       string `env:"LOG_LEVEL" envDefault:"INFO"`
+	WorkerLifeTime int    `env:"WORKER_LIFE_TIME" envDefault:"30"`
+	Port           int    `env:"PORT"`
 }
 
 func LoadConfig() (*Config, error) {

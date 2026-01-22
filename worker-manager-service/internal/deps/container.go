@@ -20,7 +20,7 @@ func NewContainer(cfg config.Config, logger *zap.Logger) *Container {
 	if err != nil {
 		panic(err)
 	}
-	webhook_repo, err := webhook.NewRedisRepository(cfg.RedisDSN, ctx, logger)
+	webhook_repo, err := webhook.NewRedisRepository(cfg.RedisDSN, ctx, logger, cfg.WorkerLifeTime)
 	if err != nil {
 		panic(err)
 	}

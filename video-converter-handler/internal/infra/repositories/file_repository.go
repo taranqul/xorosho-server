@@ -61,7 +61,7 @@ func (f *FileRepository) GetFile(name string) (io.ReadCloser, error) {
 	return fileResp.Body, err
 }
 
-func (f *FileRepository) UploadFile(name string, data io.Reader) error {
+func (f *FileRepository) UploadFile(name string, data io.ReadSeeker) error {
 	apiURL := "http://storage-gateway-service:8080/storage/internal/uploadUrl"
 	params := url.Values{}
 	params.Add("filename", name)
@@ -86,12 +86,22 @@ func (f *FileRepository) UploadFile(name string, data io.Reader) error {
 		return fmt.Errorf("failed to decode presigned URL: %w", err)
 	}
 
-	f.logger.Sugar().Infof("Got presigned URL: %s", presignedURL)
+	f.logger.Sugar().Debugf("Got presigned URL: %s", presignedURL)
+
+	size, err := data.Seek(0, io.SeekEnd)
+	if err != nil {
+		return fmt.Errorf("failed to seek data: %w", err)
+	}
+	_, err = data.Seek(0, io.SeekStart)
+	if err != nil {
+		return fmt.Errorf("failed to rewind data: %w", err)
+	}
 
 	req, err := http.NewRequest(http.MethodPut, presignedURL, data)
 	if err != nil {
 		return fmt.Errorf("failed to create upload request: %w", err)
 	}
+	req.ContentLength = size
 	req.Header.Set("Content-Type", "application/octet-stream")
 
 	client := &http.Client{}

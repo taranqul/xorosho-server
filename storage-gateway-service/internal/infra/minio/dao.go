@@ -50,7 +50,7 @@ func (m *MinioDAO) GetBuckets() error {
 }
 
 func (m *MinioDAO) GetUploadUrl(filename string, bucketname string) (string, error) {
-	url, err := m.client.PresignedPutObject(*m.ctx, bucketname, filename, time.Minute*10)
+	url, err := m.client.PresignedPutObject(*m.ctx, bucketname, filename, time.Minute*60)
 	if err != nil {
 		print(err)
 		return "", err
@@ -59,7 +59,7 @@ func (m *MinioDAO) GetUploadUrl(filename string, bucketname string) (string, err
 }
 
 func (m *MinioDAO) GetDownloadUrl(filename string, bucketname string) (string, error) {
-	url, err := m.client.PresignedGetObject(*m.ctx, bucketname, filename, time.Minute*10, nil)
+	url, err := m.client.PresignedGetObject(*m.ctx, bucketname, filename, time.Minute*60, nil)
 	if err != nil {
 		print(err)
 		return "", err

@@ -45,7 +45,7 @@ public class UrlRepository {
     @SneakyThrows
     public String getDownloadUrl(String file){
         String query = "filename=" + URLEncoder.encode(file, StandardCharsets.UTF_8)
-                     + "&bucketname=" + URLEncoder.encode("result", StandardCharsets.UTF_8);
+                     + "&bucketname=" + URLEncoder.encode("results", StandardCharsets.UTF_8);
 
         URI uri = new URI(baseUrl + "/downloadUrl"+ "?" + query);
 

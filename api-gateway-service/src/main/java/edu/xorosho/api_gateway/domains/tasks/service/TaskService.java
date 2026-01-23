@@ -49,7 +49,7 @@ public class TaskService {
         for (Map.Entry<String, String> entry : task.getObjects().entrySet()) {
             String object = entry.getKey();
             String name = entry.getValue();
-            Object object_struct = new Object(name, url_repo.getUploadUrl(name));
+            Object object_struct = new Object(name, url_repo.getDownloadUrl(name));
             result_objects.put(object, object_struct);
         }
         return new TaskResult(task.getId().toString(), result_objects, task.getPayload());
